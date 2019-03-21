@@ -4,9 +4,8 @@ document.addEventListener('DOMContentLoaded',function(){
     req.send();
     req.onload=function(){
       dataset=JSON.parse(req.responseText);
-      console.log(dataset[1].Year)
 
-      var margin = {top: 30, right: 20, bottom: 20, left: 100},
+      var margin = {top: 20, right: 40, bottom: 20, left: 40},
       width = 800 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
@@ -23,15 +22,20 @@ document.addEventListener('DOMContentLoaded',function(){
                        .domain([minY, maxY])
                        .range([0, height]);
 
-      var div = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .attr("id", "tooltip")
-        .style("opacity", 0);
+      let time = dataset.map(d => d.Time);
+      
+      const xAxis = d3.axisBottom(xScale)
+                      .tickFormat(d3.format(""));
+      
+      const yAxis = d3.axisLeft(yScale)
+                      .tickFormat((d,i) => time[i]);
 
       const svg = d3.select("body")
               .append("svg")
-              .attr("width", width)
-              .attr("height", height);
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
       svg.selectAll("circle")
       .data(dataset)
@@ -54,5 +58,20 @@ document.addEventListener('DOMContentLoaded',function(){
              .style("opacity", 0);
      });
 
+     var div = d3.select("body").append("div")
+     .attr("class", "tooltip")
+     .attr("id", "tooltip")
+     .style("opacity", 0);
+
+      // Display x-axis
+     svg.append("g")
+        .attr("id", "x-axis")
+        .attr("transform", "translate(0, " + height + ")")
+        .call(xAxis)
+
+      // Display y-axis
+      svg.append("g")
+       .attr("id", "y-axis")
+       .call(yAxis);
   };
 });
