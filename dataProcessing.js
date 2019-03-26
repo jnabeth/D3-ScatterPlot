@@ -37,6 +37,13 @@ document.addEventListener('DOMContentLoaded',function(){
               .append("g")
               .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+      var tooltip = d3.select("body").append("div")
+                    .attr("class", "tooltip")
+                    .attr("id", "tooltip")
+                    .style("opacity", 0);
+                    
+      var color = d3.scaleOrdinal(d3.schemeCategory10);
+
       svg.selectAll("circle")
       .data(dataset)
       .enter()
@@ -44,24 +51,27 @@ document.addEventListener('DOMContentLoaded',function(){
       .attr("cx", (d, i) => xScale(d.Year))
       .attr("cy", (d, i) => yScale(d.Seconds))
       .attr("r", 5)
+      //.attr("data-legend",function(d) { 
+      .style("fill", function(d){
+          if (d.Doping === "") {
+              return color("No Doping Allegations")
+          } else {
+              return color("Doping Allegations")
+          }
+        })
       .on("mouseover", function(d) {
-         div.transition()
+        tooltip.transition()
              .duration(200)
              .style("opacity", .9);
-         div.html(d.Name + ": " + d.Nationality + "<br/>Year: " + d.Year + ", Time: " + d.Time + "<br/>" +  d.Doping)
+        tooltip.html(d.Name + ": " + d.Nationality + "<br/>Year: " + d.Year + ", Time: " + d.Time + "<br/>" +  d.Doping)
              .style("left", d3.event.pageX+ "px")
              .style("top", d3.event.pageY + "px")
          })
      .on("mouseout", function(d) {
-         div.transition()
+        tooltip.transition()
              .duration(500)
              .style("opacity", 0);
      });
-
-     var div = d3.select("body").append("div")
-     .attr("class", "tooltip")
-     .attr("id", "tooltip")
-     .style("opacity", 0);
 
       // Display x-axis
      svg.append("g")
@@ -73,5 +83,27 @@ document.addEventListener('DOMContentLoaded',function(){
       svg.append("g")
        .attr("id", "y-axis")
        .call(yAxis);
+       
+      // draw legend
+      var legend = svg.selectAll(".legend")
+        .data(color.domain())
+        .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+      // draw legend colored rectangles
+      legend.append("rect")
+        .attr("x", width - 18)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", color);
+
+      // draw legend text
+      legend.append("text")
+        .attr("x", width - 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(function(d) { return d;})
   };
 });
