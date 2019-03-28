@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded',function(){
       width = 800 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
-      const minX = d3.min(dataset, (d) => d.Year);
-      const maxX = d3.max(dataset, (d) => d.Year);
-      const minY = d3.min(dataset, (d) => d.Seconds);
-      const maxY = d3.max(dataset, (d) => d.Seconds);
+      const minX = d3.min(dataset, (d) => d.Year)-1;
+      const maxX = d3.max(dataset, (d) => d.Year)+1;
+      const minY = d3.min(dataset, (d) => d.Seconds)-10;
+      const maxY = d3.max(dataset, (d) => d.Seconds)+10;
 
       const xScale = d3.scaleLinear()
                        .domain([minX, maxX])
@@ -48,10 +48,15 @@ document.addEventListener('DOMContentLoaded',function(){
       .data(dataset)
       .enter()
       .append("circle")
+      .attr("class", "dot")
+      .attr("data-xvalue", (d, i) => d.Year)
+      .attr("data-yvalue", function(d){
+        var t = new Date(1986,3,17,12,d.Time.substring(0,2),d.Time.substring(3,5));
+        return t;
+      })
       .attr("cx", (d, i) => xScale(d.Year))
       .attr("cy", (d, i) => yScale(d.Seconds))
       .attr("r", 5)
-      //.attr("data-legend",function(d) { 
       .style("fill", function(d){
           if (d.Doping === "") {
               return color("No Doping Allegations")
@@ -88,7 +93,8 @@ document.addEventListener('DOMContentLoaded',function(){
       var legend = svg.selectAll(".legend")
         .data(color.domain())
         .enter().append("g")
-        .attr("class", "legend")
+        .attr("class", "legendClass")
+        .attr("id","legend")
         .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
       // draw legend colored rectangles
