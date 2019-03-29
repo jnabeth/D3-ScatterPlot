@@ -11,24 +11,29 @@ document.addEventListener('DOMContentLoaded',function(){
 
       const minX = d3.min(dataset, (d) => d.Year)-1;
       const maxX = d3.max(dataset, (d) => d.Year)+1;
-      const minY = d3.min(dataset, (d) => d.Seconds)-10;
-      const maxY = d3.max(dataset, (d) => d.Seconds)+10;
+      const minY = d3.min(dataset, (d) => d.Seconds);
+      const maxY = d3.max(dataset, (d) => d.Seconds);
 
       const xScale = d3.scaleLinear()
                        .domain([minX, maxX])
                        .range([0, width]);
 
-      const yScale = d3.scaleLinear()
+      const yScale = d3.scaleTime()
                        .domain([minY, maxY])
                        .range([0, height]);
 
-      let time = dataset.map(d => d.Time);
+      //let time = dataset.map(d => d.Time);
       
       const xAxis = d3.axisBottom(xScale)
                       .tickFormat(d3.format(""));
       
       const yAxis = d3.axisLeft(yScale)
-                      .tickFormat((d,i) => time[i]);
+                      .tickFormat(function(d) {
+                        var minutes = Math.floor(d / 60);
+                        var seconds = +((d % 60)).toFixed(0);
+                        return (seconds == 60 ? (minutes+1) + ":00" : minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
+                      });
+                    //  .tickFormat((d,i) => time[i]);
 
       const svg = d3.select("body")
               .append("svg")
@@ -71,6 +76,7 @@ document.addEventListener('DOMContentLoaded',function(){
         tooltip.html(d.Name + ": " + d.Nationality + "<br/>Year: " + d.Year + ", Time: " + d.Time + "<br/>" +  d.Doping)
              .style("left", d3.event.pageX+ "px")
              .style("top", d3.event.pageY + "px")
+             .attr("data-year", d.Year)
          })
      .on("mouseout", function(d) {
         tooltip.transition()
